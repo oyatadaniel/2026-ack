@@ -731,17 +731,17 @@ function MissionVision() {
     {
       icon: Cross,
       title: "Our Mission",
-      text: "To make disciples of Jesus Christ by proclaiming the Gospel, teaching God's Word, and serving our community with love.",
+      text: "To equip God's people for wholesome transformation",
     },
     {
       icon: Handshake,
       title: "Our Vision",
-      text: "A transformed community where every person experiences the love of Christ and lives out their God-given purpose.",
+      text: "An Empowered, Sustainable and Mission Oriented Diocese boldly proclaiming Christ",
     },
     {
       icon: ShieldCheck,
       title: "Our Values",
-      text: "Faith, Integrity, Compassion, Excellence, and Unity — the pillars that guide everything we do as a church family.",
+      text: "Faith in God, Integrity, Unity, Professionalism, Transparency and Accountability",
     },
   ];
 

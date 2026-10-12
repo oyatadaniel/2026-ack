@@ -53,7 +53,7 @@ export default function Header({ onMenuClick, mobileNavOpen }) {
             {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          <Link href="/admin" className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3">
             <div className=" flex items-center justify-center">
               <img
                 src="/logo.png"
