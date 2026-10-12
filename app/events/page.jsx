@@ -96,6 +96,13 @@ const Events = () => {
   const [liveLoading, setLiveLoading] = useState(true);
   const [selectedLive, setSelectedLive] = useState(null); // modal with sound
 
+  /* ✅ "now" is set client-side only — avoids SSR/hydration mismatch */
+  const [now, setNow] = useState(null);
+
+  useEffect(() => {
+    setNow(new Date());
+  }, []);
+
   useEffect(() => {
     getEvents();
     getLiveStreams();
@@ -143,8 +150,6 @@ const Events = () => {
       .finally(() => setLiveLoading(false));
   };
 
-  const now = new Date();
-
   const getStart = (e) =>
     toDate(e.start_date || e.date, e.start_time || e.time);
   const getEnd = (e) =>
@@ -154,27 +159,32 @@ const Events = () => {
     );
 
   const isLive = (event) => {
+    if (!now) return false; // ✅ guard before mount
     const start = getStart(event);
     const end = getEnd(event);
     if (!start || !end) return false;
     return now >= start && now <= end;
   };
 
-  const upcomingEvents = events
-    .filter((e) => {
-      const s = getStart(e);
-      return s && s > now;
-    })
-    .sort((a, b) => getStart(a) - getStart(b));
+  const upcomingEvents = now
+    ? events
+        .filter((e) => {
+          const s = getStart(e);
+          return s && s > now;
+        })
+        .sort((a, b) => getStart(a) - getStart(b))
+    : [];
 
-  const pastEvents = events
-    .filter((e) => {
-      const end = getEnd(e);
-      return end && end < now;
-    })
-    .sort((a, b) => getStart(b) - getStart(a));
+  const pastEvents = now
+    ? events
+        .filter((e) => {
+          const end = getEnd(e);
+          return end && end < now;
+        })
+        .sort((a, b) => getStart(b) - getStart(a))
+    : [];
 
-  const liveEvents = events.filter(isLive);
+  const liveEvents = now ? events.filter(isLive) : [];
 
   const filteredEvents =
     filter === "upcoming"
@@ -258,7 +268,7 @@ const Events = () => {
         </div>
       </section>
 
-      {/* LIVE NOW SECTION — flex row, autoplay muted, click opens modal with sound */}
+      {/* LIVE NOW SECTION */}
       {!liveLoading && activeStreams.length > 0 && (
         <section className="relative py-12 bg-gradient-to-br from-rose-50 via-white to-rose-50/50">
           <div className="max-w-7xl mx-auto px-4">
@@ -285,7 +295,6 @@ const Events = () => {
                     key={idx}
                     className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden flex flex-col sm:flex-row items-stretch"
                   >
-                    {/* LEFT — Autoplaying muted video (click opens modal with sound) */}
                     <button
                       onClick={() => setSelectedLive(liveId)}
                       className="relative w-full sm:w-72 md:w-96 flex-shrink-0 aspect-video sm:aspect-auto bg-black cursor-pointer overflow-hidden"
@@ -299,7 +308,6 @@ const Events = () => {
                         allow="autoplay; encrypted-media; picture-in-picture"
                       />
 
-                      {/* Transparent overlay to capture click */}
                       <span className="absolute inset-0 z-10 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
                         <span className="w-12 h-12 rounded-full bg-white/0 group-hover:bg-white/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
                           <PlayCircle
@@ -309,7 +317,6 @@ const Events = () => {
                         </span>
                       </span>
 
-                      {/* LIVE badge */}
                       <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-red-600 text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow pointer-events-none">
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
@@ -318,7 +325,6 @@ const Events = () => {
                         LIVE
                       </div>
 
-                      {/* Muted indicator */}
                       <div className="absolute top-3 right-3 z-20 flex items-center gap-1 bg-black/60 backdrop-blur text-white text-[0.6rem] font-medium px-2 py-1 rounded-full pointer-events-none">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -339,7 +345,6 @@ const Events = () => {
                       </div>
                     </button>
 
-                    {/* MIDDLE — Description */}
                     <div className="flex-1 p-5 sm:p-6 flex flex-col justify-center min-w-0">
                       <span className="text-[0.65rem] uppercase tracking-wider text-rose-600 font-semibold mb-1">
                         Live Now
@@ -369,7 +374,6 @@ const Events = () => {
                       </div>
                     </div>
 
-                    {/* RIGHT — Watch Live with sound (opens modal) */}
                     <div className="flex-shrink-0 flex items-center justify-center px-5 py-4 sm:py-0 border-t sm:border-t-0 sm:border-l border-gray-100 bg-gray-50/50 sm:bg-transparent">
                       <button
                         onClick={() => setSelectedLive(liveId)}
@@ -612,7 +616,7 @@ const Events = () => {
         </div>
       </section>
 
-      {/* ================= LIVE PLAYBACK MODAL — WITH SOUND ================= */}
+      {/* LIVE PLAYBACK MODAL — WITH SOUND */}
       {selectedLive && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm"
@@ -622,7 +626,6 @@ const Events = () => {
             className="w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <div className="flex items-center gap-2.5">
                 <span className="relative flex h-2.5 w-2.5">
@@ -660,7 +663,6 @@ const Events = () => {
               </div>
             </div>
 
-            {/* Video — autoplay WITH SOUND (no mute=1) */}
             <div className="relative w-full aspect-video bg-black">
               <iframe
                 key={selectedLive}
@@ -672,7 +674,6 @@ const Events = () => {
               />
             </div>
 
-            {/* Modal footer */}
             <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-t border-gray-100">
               <span className="text-[11px] text-gray-500">
                 Live broadcasting from ACK Diocese of Maseno North
