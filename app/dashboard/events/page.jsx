@@ -19,6 +19,7 @@ import {
   MapPin,
   Link2,
 } from "lucide-react";
+import Cookies from "js-cookie";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -215,6 +216,7 @@ export default function EventsUpload() {
         { liveId, description: liveDescription.trim() },
         {
           headers: {
+            "access-token": Cookies.get("token"),
             "Content-Type": "application/json",
           },
         },
