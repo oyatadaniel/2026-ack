@@ -1,26 +1,142 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap");
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --font-sans:
+    "Lexend", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
+  font-family: "Lexend", sans-serif !important;
+  font-size: 12px;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ============================================================
+   EXTREMELY THIN GLOBAL SCROLLBAR
+============================================================ */
+@layer base {
+  /* ---------- WebKit (Chrome, Edge, Safari, Opera, Brave) ---------- */
+
+  /* Root document scrollbar */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 2px !important;
+    height: 2px !important;
+  }
+
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
+    background: rgba(76, 29, 149, 0.25);
+    border-radius: 9999px;
+  }
+
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover {
+    background: rgba(76, 29, 149, 0.7);
+  }
+
+  html::-webkit-scrollbar-corner,
+  body::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Every other scrollable element */
+  *::-webkit-scrollbar {
+    width: 2px !important;
+    height: 2px !important;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(76, 29, 149, 0.25);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(76, 29, 149, 0.7);
+  }
+
+  /* ---------- Firefox ---------- */
+  html,
+  body,
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(76, 29, 149, 0.25) transparent;
+  }
+
+  /* ---------- IE / Legacy Edge ---------- */
+  body {
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
+}
+/* Quill container tweaks */
+.news-quill .ql-toolbar {
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  padding: 6px 8px;
+}
+
+.news-quill .ql-container {
+  border: none;
+  font-size: 11px;
+  min-height: 180px;
+}
+
+.news-quill .ql-editor {
+  min-height: 160px;
+  color: #374151;
+  padding: 10px 12px;
+}
+
+.news-quill .ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+  font-size: 11px;
+}
+
+/* Dark mode */
+.dark .news-quill .ql-toolbar {
+  border-bottom-color: #1f2937;
+  background: #030712;
+}
+
+.dark .news-quill .ql-container {
+  background: #030712;
+  color: #e5e7eb;
+}
+
+.dark .news-quill .ql-editor {
+  color: #e5e7eb;
+}
+
+.dark .news-quill .ql-editor.ql-blank::before {
+  color: #6b7280;
+}
+
+/* Icons visibility in dark mode */
+.dark .news-quill .ql-snow .ql-stroke {
+  stroke: #9ca3af;
+}
+.dark .news-quill .ql-snow .ql-fill {
+  fill: #9ca3af;
+}
+.dark .news-quill .ql-snow .ql-picker {
+  color: #9ca3af;
 }
