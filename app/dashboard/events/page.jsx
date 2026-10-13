@@ -24,6 +24,14 @@ import Cookies from "js-cookie";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 /* ============================================================
+   Auth header helper
+============================================================ */
+const authHeaders = () => ({
+  "Content-Type": "application/json",
+  "access-token": Cookies.get("token"), // replace "token" with your cookie name
+});
+
+/* ============================================================
    Extract YouTube live/video ID from many URL shapes
 ============================================================ */
 const extractYouTubeId = (input) => {
@@ -177,7 +185,7 @@ export default function EventsUpload() {
           description,
           image,
         },
-        { headers: { "Content-Type": "application/json" } },
+        { headers: authHeaders() },
       )
       .then(() => {
         toast.success("Event added successfully");
@@ -214,12 +222,7 @@ export default function EventsUpload() {
       .post(
         `${BACKEND_URL}/saveLiveId`,
         { liveId, description: liveDescription.trim() },
-        {
-          headers: {
-            "access-token": Cookies.get("token"),
-            "Content-Type": "application/json",
-          },
-        },
+        { headers: authHeaders() },
       )
       .then(() => {
         toast.success(`Live event started (${liveId})`);
@@ -238,16 +241,22 @@ export default function EventsUpload() {
 
   /* ---------------- Fetch events ---------------- */
   const getEvents = () => {
-    axios.get(`${BACKEND_URL}/getAllEvents`).then((res) => {
-      setEvents(res.data);
-    });
+    axios
+      .get(`${BACKEND_URL}/getAllEvents`, {
+        headers: authHeaders(),
+      })
+      .then((res) => {
+        setEvents(res.data);
+      });
   };
 
   /* ---------------- Fetch live events ---------------- */
   const fetchLiveEvents = () => {
     setLiveLoading(true);
     axios
-      .get(`${BACKEND_URL}/getAllLiveIds`)
+      .get(`${BACKEND_URL}/getAllLiveIds`, {
+        headers: authHeaders(),
+      })
       .then((res) => {
         const data = res.data || [];
         setLiveEvents(data);
@@ -260,7 +269,9 @@ export default function EventsUpload() {
       .catch((err) => {
         console.error(err);
         axios
-          .get(`${BACKEND_URL}/getLatestLiveId`)
+          .get(`${BACKEND_URL}/getLatestLiveId`, {
+            headers: authHeaders(),
+          })
           .then((res2) => {
             if (res2.data?.liveId) {
               setLiveEvents([
@@ -292,7 +303,11 @@ export default function EventsUpload() {
   /* ---------------- Expire live ---------------- */
   const expireLiveEvent = (liveId) => {
     axios
-      .post(`${BACKEND_URL}/expireLiveId`, { liveId })
+      .post(
+        `${BACKEND_URL}/expireLiveId`,
+        { liveId },
+        { headers: authHeaders() },
+      )
       .then(() => {
         toast.success("Live event expired");
         fetchLiveEvents();
@@ -432,6 +447,9 @@ export default function EventsUpload() {
                 const isActive =
                   (status || "").toString().toLowerCase() === "active";
 
+                /* ✅ End button only usable while the event is active */
+                const canEnd = isActive;
+
                 return (
                   <div
                     key={idx}
@@ -442,7 +460,6 @@ export default function EventsUpload() {
                       <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 w-56 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 ease-out">
                         <div className="relative bg-gray-900 dark:bg-gray-800 text-white text-[10px] leading-relaxed rounded-lg px-2.5 py-2 shadow-lg border border-gray-700/50 whitespace-pre-wrap break-words">
                           {liveDesc}
-                          {/* Arrow */}
                           <span className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-gray-900 dark:bg-gray-800 rotate-45 -mt-1 border-r border-b border-gray-700/50" />
                         </div>
                       </div>
@@ -551,8 +568,14 @@ export default function EventsUpload() {
                         YouTube
                       </button>
                       <button
-                        onClick={() => expireLiveEvent(liveId)}
-                        className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-600 dark:text-rose-400 hover:underline"
+                        onClick={() => canEnd && expireLiveEvent(liveId)}
+                        disabled={!canEnd}
+                        title={
+                          canEnd
+                            ? "End this live event"
+                            : "This event has already ended"
+                        }
+                        className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-600 dark:text-rose-400 hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                       >
                         <StopCircle size={10} />
                         End

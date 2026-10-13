@@ -222,7 +222,9 @@ export default function Header() {
     },
     { name: "Archdeaconries", href: "/archdeaconries" },
     { name: "Events", href: "/events" },
+    { name: "Sermons", href: "/sermons" },
     { name: "News", href: "/news" },
+    { name: "Careers", href: "/careers" },
     { name: "Contact", href: "/contact" },
   ];
 
