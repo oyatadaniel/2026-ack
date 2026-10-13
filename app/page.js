@@ -913,6 +913,13 @@ function Sermons() {
         <div className="grid md:grid-cols-3 gap-6">
           {sermons.slice(0, 3).map((s, i) => {
             const embed = getYouTubeEmbedUrl(s.link);
+            const videoId = getYouTubeVideoId(s.link);
+            const thumb =
+              s.image ||
+              (videoId
+                ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                : "/service1.jpg");
+
             return (
               <div
                 key={i}
@@ -920,12 +927,29 @@ function Sermons() {
               >
                 <div className="relative h-56 overflow-hidden bg-black">
                   {embed ? (
-                    <iframe
-                      src={embed}
-                      title={s.title}
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
+                    <a
+                      href={s.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative block w-full h-full"
+                    >
+                      <img
+                        src={thumb}
+                        alt={s.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
+                        <span className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="w-6 h-6 text-[#4c1d95] ml-1"
+                            fill="currentColor"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      </span>
+                    </a>
                   ) : (
                     <img
                       src={s.image || "/service1.jpg"}

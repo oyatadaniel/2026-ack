@@ -200,8 +200,21 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-white/10 py-5 text-center text-xs text-white/50 px-4">
-        &copy; {year ?? " "} ACK Diocese of Maseno North. All rights reserved.
-        Built with care.
+        <p>
+          &copy; {year ?? " "} ACK Diocese of Maseno North. All rights reserved.
+          Built with care.
+        </p>
+        <p className="mt-1">
+          Developed and maintained by{" "}
+          <a
+            href="https://datisoftwares.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#9333ea] hover:text-white font-medium transition"
+          >
+            DATI Softwares LTD
+          </a>
+        </p>
       </div>
     </footer>
   );
