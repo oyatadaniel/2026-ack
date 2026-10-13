@@ -37,10 +37,25 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const getYouTubeEmbedUrl = (url) => {
   if (!url) return null;
   const m = url.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/,
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|live\/))([\w-]{11})/,
   );
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
 };
+
+function getYouTubeVideoId(url) {
+  if (!url) return null;
+  const patterns = [
+    /youtu\.be\/([^?&]+)/,
+    /youtube\.com\/watch\?v=([^?&]+)/,
+    /youtube\.com\/live\/([^?&]+)/,
+    /youtube\.com\/embed\/([^?&]+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
 
 const getYearsServing = (dateInstalled) => {
   if (!dateInstalled) return null;
@@ -721,21 +736,6 @@ function Welcome() {
       `}</style>
     </section>
   );
-}
-
-function getYouTubeVideoId(url) {
-  if (!url) return null;
-  const patterns = [
-    /youtu\.be\/([^?&]+)/,
-    /youtube\.com\/watch\?v=([^?&]+)/,
-    /youtube\.com\/live\/([^?&]+)/,
-    /youtube\.com\/embed\/([^?&]+)/,
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
-  }
-  return null;
 }
 
 /* ============================================================
