@@ -977,6 +977,12 @@ function Sermons() {
                   <h3 className="font-bold text-lg text-gray-900 mb-2 capitalize">
                     {s.title}
                   </h3>
+                  {s.created_at && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                      <Calendar size={12} />
+                      {moment.utc(s.created_at).format("DD MMM YYYY • h:mm A")}
+                    </div>
+                  )}
                   <p className="text-sm text-gray-500 capitalize">
                     {s.preacher || s.speaker || ""}
                   </p>
