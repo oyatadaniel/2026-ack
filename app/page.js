@@ -541,7 +541,7 @@ function HeroCarousel({ onJoinClick }) {
                     Join As A Member <ArrowRight size={16} />
                   </button>
                   <a
-                    href="/live"
+                    href="/sermons"
                     className="border border-white/60 text-white font-semibold px-6 py-3 rounded-full hover:bg-white hover:text-[#4c1d95] transition inline-flex items-center gap-2"
                   >
                     <Play size={16} /> Watch Live Events
@@ -1033,7 +1033,7 @@ function News() {
           {news.slice(0, 6).map((n, i) => (
             <a
               key={i}
-              href={`/site/news-details?id=${n.id}`}
+              href={`/news/details?id=${n.id}`}
               className="group rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all border border-gray-100 flex flex-col"
             >
               <div className="h-52 overflow-hidden">
