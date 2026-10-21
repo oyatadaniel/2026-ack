@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import Image from "next/image";
 import moment from "moment";
 import {
   Calendar,
@@ -17,6 +18,26 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+/**
+ * Optimize a Cloudinary URL by injecting delivery transformations.
+ * - q_auto: automatic quality (visually lossless, ~70% smaller)
+ * - f_auto: automatic format (WebP/AVIF for modern browsers)
+ * - w_XXX:  resize on the fly to the width we actually render
+ *
+ * Safe: returns the original URL untouched if it's not a Cloudinary URL.
+ */
+const optimizeCloudinaryUrl = (url, width) => {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) {
+    return url;
+  }
+
+  const transforms = [`q_auto`, `f_auto`];
+  if (width) transforms.push(`w_${width}`, `c_limit`);
+
+  return url.replace("/upload/", `/upload/${transforms.join(",")}/`);
+};
 
 export default function NewsDetailsClient() {
   const searchParams = useSearchParams();
@@ -174,11 +195,14 @@ export default function NewsDetailsClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
           <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-w-0">
             {news.file && (
-              <div className="relative w-full">
-                <img
-                  src={news.file}
+              <div className="relative w-full h-[260px] sm:h-[360px] md:h-[460px]">
+                <Image
+                  src={optimizeCloudinaryUrl(news.file, 1600)}
                   alt={news.title}
-                  className="w-full max-h-[460px] object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                  className="object-cover"
+                  priority
                 />
               </div>
             )}
@@ -233,11 +257,13 @@ export default function NewsDetailsClient() {
                       className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all overflow-hidden flex flex-col min-w-0"
                     >
                       {item.file && (
-                        <div className="relative overflow-hidden">
-                          <img
-                            src={item.file}
+                        <div className="relative w-full h-44 overflow-hidden">
+                          <Image
+                            src={optimizeCloudinaryUrl(item.file, 500)}
                             alt={item.title}
-                            className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500"
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
                       )}
