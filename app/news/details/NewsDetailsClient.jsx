@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import Image from "next/image";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -175,7 +176,7 @@ export default function NewsDetailsClient() {
           <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-w-0">
             {news.file && (
               <div className="relative w-full">
-                <img
+                <Image
                   src={news.file}
                   alt={news.title}
                   className="w-full max-h-[460px] object-cover"
@@ -234,7 +235,7 @@ export default function NewsDetailsClient() {
                     >
                       {item.file && (
                         <div className="relative overflow-hidden">
-                          <img
+                          <Image
                             src={item.file}
                             alt={item.title}
                             className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500"
