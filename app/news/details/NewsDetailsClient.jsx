@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
-import Image from "next/image";
 import moment from "moment";
 import {
   Calendar,
@@ -19,103 +18,25 @@ import Footer from "@/app/components/Footer";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-/* ---------------- Skeleton Components ---------------- */
+/**
+ * Optimize a Cloudinary URL by injecting delivery transformations.
+ * - q_auto: automatic quality (visually lossless, ~70% smaller)
+ * - f_auto: automatic format (WebP/AVIF for modern browsers)
+ * - w_XXX:  resize on the fly to the width we actually render
+ *
+ * Safe: returns the original URL untouched if it's not a Cloudinary URL.
+ */
+const optimizeCloudinaryUrl = (url, width) => {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) {
+    return url;
+  }
 
-function SkeletonBlock({ className = "" }) {
-  return (
-    <div className={`animate-pulse rounded-md bg-gray-200/80 ${className}`} />
-  );
-}
+  const transforms = [`q_auto`, `f_auto`];
+  if (width) transforms.push(`w_${width}`, `c_limit`);
 
-function HeroSkeleton() {
-  return (
-    <section className="relative bg-gradient-to-r from-[#4c1d95] to-[#9333ea] text-white overflow-hidden w-full">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-14 md:py-20 w-full">
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <SkeletonBlock className="h-3 w-12 bg-white/20" />
-          <SkeletonBlock className="h-3 w-3 bg-white/20 rounded-full" />
-          <SkeletonBlock className="h-3 w-12 bg-white/20" />
-          <SkeletonBlock className="h-3 w-3 bg-white/20 rounded-full" />
-          <SkeletonBlock className="h-3 w-20 bg-white/20" />
-        </div>
-        <SkeletonBlock className="h-3 w-32 mb-3 bg-white/20" />
-        <SkeletonBlock className="h-9 md:h-12 w-4/5 mb-3 bg-white/20" />
-        <SkeletonBlock className="h-9 md:h-12 w-2/3 mb-6 bg-white/20" />
-        <div className="flex flex-wrap items-center gap-4">
-          <SkeletonBlock className="h-4 w-28 bg-white/20" />
-          <SkeletonBlock className="h-4 w-20 bg-white/20" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ArticleSkeleton() {
-  return (
-    <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-w-0">
-      <SkeletonBlock className="w-full h-[280px] md:h-[460px] rounded-none" />
-      <div className="p-6 md:p-10 space-y-3">
-        <SkeletonBlock className="h-4 w-full" />
-        <SkeletonBlock className="h-4 w-11/12" />
-        <SkeletonBlock className="h-4 w-full" />
-        <SkeletonBlock className="h-4 w-10/12" />
-        <SkeletonBlock className="h-4 w-full mt-6" />
-        <SkeletonBlock className="h-4 w-9/12" />
-        <SkeletonBlock className="h-4 w-full" />
-        <SkeletonBlock className="h-4 w-8/12" />
-      </div>
-    </article>
-  );
-}
-
-function RelatedCardSkeleton() {
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-      <SkeletonBlock className="w-full h-44 rounded-none" />
-      <div className="p-4 space-y-3 flex-1">
-        <SkeletonBlock className="h-4 w-full" />
-        <SkeletonBlock className="h-4 w-3/4" />
-        <SkeletonBlock className="h-3 w-24 mt-2" />
-        <SkeletonBlock className="h-3 w-full" />
-        <SkeletonBlock className="h-3 w-10/12" />
-      </div>
-    </div>
-  );
-}
-
-function NewsDetailsSkeleton() {
-  return (
-    <div className="min-h-screen bg-white font-sans antialiased overflow-x-hidden w-full max-w-full">
-      <Header />
-      <HeroSkeleton />
-      <section className="py-14 md:py-20 bg-gray-50 w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
-          <ArticleSkeleton />
-
-          <div className="mt-6">
-            <SkeletonBlock className="h-4 w-36" />
-          </div>
-
-          <div className="mt-14">
-            <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-              <SkeletonBlock className="h-3 w-28 mx-auto" />
-              <SkeletonBlock className="h-7 w-72 mx-auto" />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <RelatedCardSkeleton key={i} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-      <Footer />
-    </div>
-  );
-}
-
-/* ---------------- Main Component ---------------- */
+  return url.replace("/upload/", `/upload/${transforms.join(",")}/`);
+};
 
 export default function NewsDetailsClient() {
   const searchParams = useSearchParams();
@@ -177,7 +98,16 @@ export default function NewsDetailsClient() {
     str && str.length > len ? str.slice(0, len) + "..." : str || "";
 
   if (loading) {
-    return <NewsDetailsSkeleton />;
+    return (
+      <div className="min-h-screen bg-white font-sans antialiased">
+        <Header />
+        <div className="flex items-center justify-center py-32 text-gray-500 gap-2">
+          <Loader2 size={18} className="animate-spin" />
+          Loading article...
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   if (!news) {
@@ -195,7 +125,7 @@ export default function NewsDetailsClient() {
             The article you're looking for may have been removed or moved.
           </p>
           <Link
-            href="/site/news"
+            href="/news"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-[#4c1d95] to-[#9333ea] text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:opacity-95 transition"
           >
             <ArrowLeft size={16} />
@@ -230,7 +160,7 @@ export default function NewsDetailsClient() {
             </Link>
             <ChevronRight size={14} className="text-white/50 flex-shrink-0" />
             <Link
-              href="/site/news"
+              href="/news"
               className="text-white/70 hover:text-white transition"
             >
               News
@@ -264,14 +194,14 @@ export default function NewsDetailsClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
           <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-w-0">
             {news.file && (
-              <div className="relative w-full aspect-[16/9] md:aspect-auto md:max-h-[460px] md:h-[460px]">
-                <Image
-                  src={news.file}
+              <div className="relative w-full h-[260px] sm:h-[360px] md:h-[460px]">
+                <img
+                  src={optimizeCloudinaryUrl(news.file, 1600)}
                   alt={news.title}
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 100vw, 1280px"
-                  className="object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                 />
               </div>
             )}
@@ -326,13 +256,13 @@ export default function NewsDetailsClient() {
                       className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all overflow-hidden flex flex-col min-w-0"
                     >
                       {item.file && (
-                        <div className="relative overflow-hidden h-44">
-                          <Image
-                            src={item.file}
+                        <div className="relative w-full h-44 overflow-hidden">
+                          <img
+                            src={optimizeCloudinaryUrl(item.file, 500)}
                             alt={item.title}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
                       )}
